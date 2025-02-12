@@ -57,4 +57,6 @@ views/ - UI screens (e.g., TransferMoneyPage, BeneficiaryList)
 
 widgets/ - Reusable UI components
 
+![App Preview](assets/images/snapshot.jpg)
+
 
