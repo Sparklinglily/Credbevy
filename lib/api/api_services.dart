@@ -5,6 +5,8 @@ import 'package:credbevy/data/models/all_beneficiaries.dart';
 import 'package:credbevy/data/models/all_expenses.dart';
 import 'package:credbevy/data/models/balance.dart';
 import 'package:credbevy/data/models/cards.dart';
+import 'package:credbevy/data/models/single_beneficiary.dart';
+import 'package:credbevy/data/models/transfer.dart';
 import 'package:dio/dio.dart';
 
 class ApiServices {
@@ -43,6 +45,21 @@ class ApiServices {
     }
   }
 
+  Future<UserSingleResponse> getSingleBeneficiary() async {
+    try {
+      final response = await _dio.get(ApiEndpoints.singleBeneficiary);
+
+      if (response.data is Map<String, dynamic>) {
+        final userResponse = UserSingleResponse.fromJson(response.data);
+        return userResponse;
+      } else {
+        throw Exception("Unexpected data format");
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<List<ExpenseModel>> getExpenses() async {
     try {
       final response = await _dio.get(ApiEndpoints.expenses);
@@ -71,14 +88,52 @@ class ApiServices {
         List jsonList = response.data['data'];
         final allBeneficiaries =
             jsonList.map((e) => UserModel.fromJson(e)).toList();
-        print("List: ${allBeneficiaries.toString()}");
+
         return allBeneficiaries;
       } else {
-        print("Unexpected data format: ${response.data.runtimeType}");
         throw Exception("Unexpected data format");
       }
     } catch (e) {
-      print("Error fetching cards: $e");
+      rethrow;
+    }
+  }
+
+  Future<TransactionResponse> transferMoney({
+    required String receiverId,
+    required double amount,
+  }) async {
+    try {
+      // Log the input values
+      print(
+          'Attempting transfer with receiverId: $receiverId, amount: $amount');
+
+      if (receiverId.isEmpty) {
+        throw Exception('receiverId cannot be empty');
+      }
+
+      final requestData = {
+        "receiver_id": receiverId,
+        "amount": amount,
+      };
+
+      final response = await _dio.post(
+        ApiEndpoints.transfer,
+        data: requestData,
+      );
+
+      // Log the raw response
+      print('Raw API response: ${response.data}');
+
+      if (response.data is Map<String, dynamic>) {
+        final transactionResponse = TransactionResponse.fromJson(response.data);
+        print("Transaction Successful: ${transactionResponse.message}");
+        return transactionResponse;
+      } else {
+        throw Exception("Unexpected data format: ${response.data.runtimeType}");
+      }
+    } on DioException catch (e) {
+      rethrow;
+    } catch (e) {
       rethrow;
     }
   }

@@ -3,11 +3,14 @@
 import 'package:credbevy/core/constants/app_assets.dart';
 import 'package:credbevy/core/constants/app_colors.dart';
 import 'package:credbevy/core/constants/app_widgets/app_text_span.dart';
+import 'package:credbevy/core/constants/dependency_injection/locator.dart';
+import 'package:credbevy/data/models/transfer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
 class TransferSuccesfulPage extends StatelessWidget {
-  const TransferSuccesfulPage({super.key});
+  final TransactionResponse transactionResponse;
+  const TransferSuccesfulPage({super.key, required this.transactionResponse});
 
   @override
   Widget build(BuildContext context) {
@@ -36,12 +39,37 @@ class TransferSuccesfulPage extends StatelessWidget {
               height: 20,
             ),
             AppTextSpan(
-                text1: "Transfer succesfully sent to ", text2: "Walter White"),
+              text1: "Transfer succesfully sent to ",
+              text2: " Walter White",
+
+              //  text2: transactionResponse.transaction.receiver.fullName
+            ),
             Text(
               "Ref: the latest batch 99.5% pure.",
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
+              ),
+            ),
+            Spacer(),
+            ElevatedButton(
+              onPressed: () {
+                navigationService.pop();
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: Size(double.infinity, 50),
+                backgroundColor: AppColors.blackColor,
+                padding: EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: const Text(
+                "Back",
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.white),
               ),
             ),
           ],

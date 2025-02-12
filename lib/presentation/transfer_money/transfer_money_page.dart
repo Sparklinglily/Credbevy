@@ -11,13 +11,16 @@ import 'package:flutter_svg/svg.dart';
 import 'package:stacked/stacked.dart';
 
 class TransferMoneyPage extends StatelessWidget {
-  const TransferMoneyPage({super.key});
+  final int userId;
+
+  const TransferMoneyPage({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
     return ViewModelBuilder.reactive(
         onViewModelReady: (viewModel) => viewModel.init(),
+        //onModelReady: (viewModel) => viewModel.selectSingleBeneficiary(userId),
         viewModelBuilder: () => TransferMoneyViewmodel(),
         builder: (context, model, child) {
           return Scaffold(
@@ -64,7 +67,7 @@ class TransferMoneyPage extends StatelessWidget {
                                 fontSize: 15,
                                 fontWeight: FontWeight.w400,
                                 color: AppColors.textColor)),
-                        buildBalance(model),
+                        buildBalance(model, context),
                         SizedBox(
                           height: 10,
                         ),
@@ -114,7 +117,7 @@ class TransferMoneyPage extends StatelessWidget {
                         ),
                         SizedBox(
                             height: size.height * 0.2,
-                            child: buildBeneficiaryList(model)),
+                            child: buildBeneficiaryList(model, context)),
                         SizedBox(
                           height: 20,
                         ),
@@ -123,6 +126,9 @@ class TransferMoneyPage extends StatelessWidget {
                           height: 5,
                         ),
                         TextField(
+                          controller: TextEditingController(
+                            text: model.selectedUser?.fullName ?? "",
+                          ),
                           decoration: InputDecoration(
                             hintText: "",
                             hintStyle: TextStyle(
@@ -143,6 +149,8 @@ class TransferMoneyPage extends StatelessWidget {
                           height: 5,
                         ),
                         TextField(
+                          keyboardType: TextInputType.number,
+                          controller: model.amountController,
                           decoration: InputDecoration(
                             hintText: "How much do you want to send",
                             hintStyle: TextStyle(
@@ -256,7 +264,7 @@ class TransferMoneyPage extends StatelessWidget {
                         ),
                         ElevatedButton.icon(
                           onPressed: () {
-                            navigationService.push(TransferSuccesfulPage());
+                            model.transferMoney();
                           },
                           style: ElevatedButton.styleFrom(
                             minimumSize: Size(double.infinity, 50),
@@ -267,13 +275,15 @@ class TransferMoneyPage extends StatelessWidget {
                             ),
                           ),
                           icon: SvgPicture.asset(AppAssets.transfer),
-                          label: const Text(
-                            "Send Money",
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.white),
-                          ),
+                          label: model.isBusy
+                              ? CircularProgressIndicator()
+                              : const Text(
+                                  "Send Money",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.white),
+                                ),
                         ),
                       ],
                     ),
@@ -283,7 +293,7 @@ class TransferMoneyPage extends StatelessWidget {
         });
   }
 
-  Widget buildBalance(TransferMoneyViewmodel model) {
+  Widget buildBalance(TransferMoneyViewmodel model, BuildContext context) {
     if (model.isBusy) {
       return CircularProgressIndicator();
     } else if (model.balanceResponse == null) {
@@ -303,22 +313,30 @@ class TransferMoneyPage extends StatelessWidget {
     }
   }
 
-  Widget buildBeneficiaryList(TransferMoneyViewmodel model) {
+  Widget buildBeneficiaryList(
+      TransferMoneyViewmodel model, BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
     if (model.isBusy) {
       return Center(child: CircularProgressIndicator());
     } else if (model.beneficiaries == null || model.beneficiaries!.isEmpty) {
       return Center(child: Text("No beneficiaries found"));
     } else {
       return ListView.separated(
+        physics: BouncingScrollPhysics(),
         scrollDirection: Axis.horizontal,
         itemCount: model.beneficiaries!.length,
         itemBuilder: (context, index) {
           final beneficiary = model.beneficiaries![index];
+          //final isSelected = model.selectedUser?.id == beneficiary.id;
           bool isSelected = index == model.selectedIndex;
 
           return GestureDetector(
-            onTap: () => model.selectCard(index),
+            onTap: () {
+              model.selectCard(index);
+              // model.selectSingleBeneficiary(index);
+            },
             child: Container(
+              alignment: Alignment.center,
               decoration: BoxDecoration(
                 boxShadow: [
                   BoxShadow(
@@ -331,24 +349,27 @@ class TransferMoneyPage extends StatelessWidget {
                 color: isSelected ? AppColors.primaryColor : AppColors.white,
                 borderRadius: BorderRadius.circular(16),
               ),
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.all(8),
+              width: size.width * 0.32,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircleAvatar(
                     radius: 20,
-                    backgroundImage: beneficiary.image.isNotEmpty
+                    backgroundImage: beneficiary.image.isEmpty
                         ? NetworkImage(beneficiary.image)
-                        : AssetImage(AppAssets.profilepic) as ImageProvider,
+                        : AssetImage(AppAssets.walter),
                   ),
                   SizedBox(height: 5),
-                  Text(
-                    beneficiary.fullName,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
-                      color:
-                          isSelected ? AppColors.white : AppColors.blackColor,
+                  FittedBox(
+                    child: Text(
+                      beneficiary.fullName,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color:
+                            isSelected ? AppColors.white : AppColors.blackColor,
+                      ),
                     ),
                   ),
                   SizedBox(height: 10),

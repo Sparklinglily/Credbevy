@@ -127,7 +127,9 @@ class HomePage extends StatelessWidget {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        navigationService.push(TransferMoneyPage());
+                        navigationService.push(TransferMoneyPage(
+                          userId: 0,
+                        ));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.blackColor,

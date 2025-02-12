@@ -36,7 +36,7 @@ class HomeViewmodel extends BaseViewModel {
     setBusy(true);
     try {
       _expenses = await apiServices.getExpenses();
-      print("$expenses: succesfuly done the job");
+
       notifyListeners();
     } catch (e) {
       _theError = e.toString();
