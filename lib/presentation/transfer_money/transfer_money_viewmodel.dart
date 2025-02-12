@@ -1,7 +1,8 @@
+// ignore_for_file: depend_on_referenced_packages
+
 import 'package:credbevy/core/constants/dependency_injection/locator.dart';
 import 'package:credbevy/data/models/all_beneficiaries.dart';
 import 'package:credbevy/data/models/balance.dart';
-import 'package:credbevy/data/models/single_beneficiary.dart';
 import 'package:credbevy/data/models/transfer.dart';
 import 'package:credbevy/presentation/transfer_succesful/transfer_succesful_page.dart';
 import 'package:flutter/material.dart';
@@ -80,10 +81,6 @@ class TransferMoneyViewmodel extends BaseViewModel {
 
     setBusy(true);
     try {
-      print("Initiating transfer...");
-      print("Receiver ID: ${_selectedUser!.id.toString()}");
-      print("Receiver name: ${_selectedUser!.fullName}");
-
       double amount = double.parse(amountController.text);
       _transactionResponse = await apiServices.transferMoney(
           receiverId: selectedUser!.id.toString(), amount: amount);

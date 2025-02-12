@@ -39,11 +39,8 @@ class TransferSuccesfulPage extends StatelessWidget {
               height: 20,
             ),
             AppTextSpan(
-              text1: "Transfer succesfully sent to ",
-              text2: " Walter White",
-
-              //  text2: transactionResponse.transaction.receiver.fullName
-            ),
+                text1: "Transfer succesfully sent to ",
+                text2: transactionResponse.transaction.receiver.fullName),
             Text(
               "Ref: the latest batch 99.5% pure.",
               style: TextStyle(
